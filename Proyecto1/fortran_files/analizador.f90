@@ -4,12 +4,15 @@ module AnalizadorModulo
     private :: isalpha, isdigit
     public :: Analizador, analizarCadena
     type :: Analizador
+        type(Token), dimension(:), allocatable :: listTokens
         integer :: columna, fila, estado! Posiciön "X" | "Y"
         character(len=:), allocatable :: lexema
+        character(len=100) :: typeLexema
 
     contains
         procedure :: analizarCadena
-        procedure :: agregarToken
+        procedure :: printTokens
+        procedure, private :: agregarToken
         procedure, private :: palabraReservada
     
     end type Analizador
@@ -48,24 +51,31 @@ contains
                     this%columna = this%columna + 1
 
                 else if (actual == ':') then ! Dos puntos
+                    this%typeLexema = 'DOS PUNTOS'
+                    this%lexema = this%lexema // actual
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
                     this%columna =  this%columna + 1
 
                 else if (actual == '{') then ! Llave abre
+                    this%typeLexema = 'LLAVE ABRE'
+                    this%lexema = this%lexema // actual
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
                     this%columna =  this%columna + 1
                 
                 else if (actual == '}') then ! Llave cierra
+                    this%typeLexema = 'LLAVE CIERRA'
+                    this%lexema = this%lexema // actual
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
-                    
                     this%columna = this%columna + 1
                 
                 else if (actual == ';') then ! Punto y coma
+                    this%typeLexema = 'PUNTO COMA'
+                    this%lexema = this%lexema // actual
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
                     this%columna =  this%columna + 1
 
                 else if (actual == '#') then 
@@ -77,8 +87,10 @@ contains
                     this%columna =  this%columna + 1
                 
                 else ! Caracter sin reconocer
+                    this%typeLexema = 'ERROR'
+                    this%lexema = this%lexema // actual
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
                     this%columna =  this%columna + 1
                     
                 end if
@@ -91,8 +103,7 @@ contains
                 else
                     call this%palabraReservada()
                     this%estado = 0
-                    this%lexema = ''
-
+                    
                 end if
             else if ( this%estado == 2 ) then
                 if ( actual /= '"' ) then
@@ -101,8 +112,10 @@ contains
                     this%columna = this%columna + 1
                     
                 else
+                    this%typeLexema = 'CADENA'
+                    this%lexema = this%lexema // actual
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
                     this%columna = this%columna + 1
                 end if
                 
@@ -113,14 +126,16 @@ contains
                     this%columna = this%columna + 1
 
                 else if ( actual == '%') then
-                    this%estado = 0
+                    this%typeLexema = 'PORCENTAJE'
                     this%lexema = this%lexema // actual
-                    this%lexema = ''
+                    call this%agregarToken()
+                    this%estado = 0
                     this%columna = this%columna + 1
                 
                 else
+                    this%typeLexema = 'ENTERO'
+                    call this%agregarToken()
                     this%estado = 0
-                    this%lexema = ''
                     
                 end if
             
@@ -160,16 +175,67 @@ contains
 
     subroutine palabraReservada(this)
         class(Analizador), intent(inout) :: this
-        print *, this%lexema
+        this%typeLexema = 'PALABRA RESERVADA'
+        if ( TRIM(this%lexema) == "grafica" ) then
+            call this%agregarToken()
+        else if ( TRIM(this%lexema) == "nombre" ) then
+            call this%agregarToken()
+        else if ( TRIM(this%lexema) == "continente" ) then
+            call this%agregarToken()
+        else if ( TRIM(this%lexema) == "pais" ) then
+            call this%agregarToken()
+        else if ( TRIM(this%lexema) == "poblacion" ) then
+            call this%agregarToken()
+        else if ( TRIM(this%lexema) == "saturacion" ) then
+            call this%agregarToken()
+        else if ( TRIM(this%lexema) == "bandera" ) then
+            call this%agregarToken()
+        else
+            this%typeLexema = "PALABRA DESCONOCIDA"
+            call this%agregarToken()
+        end if
         
     end subroutine
 
     subroutine agregarToken(this)
         class(Analizador), intent(inout) :: this
+        class(Token), allocatable :: temp(:)
+        integer :: i
+
+        i = SIZE(this%listTokens) + 1
+
+        if ( allocated(this%listTokens) ) then
+            allocate(temp(i-1))
+            temp = this%listTokens
+            deallocate(this%listTokens)
+            allocate(this%listTokens(i))
+            this%listTokens(1:i-1) = temp
+            deallocate(temp)
+        else
+            allocate(this%listTokens(i))
+        end if
+
+        this%listTokens(i)%lexema = this%lexema
+        this%listTokens(i)%type = this%typeLexema
+        this%listTokens(i)%position_x = this%columna
+        this%listTokens(i)%posicion_y = this%fila
+
+        this%lexema = ''
         
+    end subroutine
+
+    subroutine printTokens(this)
+        class(Analizador), intent(inout) :: this
+      
+        integer :: i
+
+        i = SIZE(this%listTokens)
+
+        do i = 1, SIZE(this%listTokens)
+            print *, 'Token: ' , this%listTokens(i)%type , ' Lexema: ' , this%listTokens(i)%lexema
+            
+        end do
+
     end subroutine 
     
 end module AnalizadorModulo
-
-
-
