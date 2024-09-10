@@ -6,7 +6,7 @@ module TokenModule
         character(len = 100) :: lexema
         character(len = 100) :: type
         integer :: position_x
-        integer :: posicion_y
+        integer :: position_y
     contains
 
     end type Token

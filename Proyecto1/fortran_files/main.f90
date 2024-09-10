@@ -2,10 +2,13 @@ program main
 
     use TokenModule
     use AnalizadorModulo
+    use GraficaModulo
 
     implicit none
         ! Define variables
         type(Analizador) :: miAnalizador
+        type(Grafica) :: miGrafica
+
         call readFile()
 
     contains
@@ -33,7 +36,10 @@ program main
         ! Cerramos el archivo
         close(2)
         
-        call miAnalizador%printTokens()
+        ! call miAnalizador%printTokens()
+        call miAnalizador%guardarDatos(miGrafica)
+        call miGrafica%printDates()
+        !call miAnalizador%reporteTokens()
         
     end subroutine readFile
     
