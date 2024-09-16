@@ -1,20 +1,30 @@
-module AnalizadorModulo
-    use TokenModule
-    use GraficaModulo
+module ModuloAnalizador
+    use ModuloGrafica
     implicit none
-    private :: isalpha, isdigit
+    private :: isalpha, isdigit, Token
     public :: Analizador, analizarCadena
+    
+    type ::Token
+        character(len = 100) :: lexema
+        character(len = 100) :: type
+        integer :: position_x
+        integer :: position_y
+
+    end type Token
+
     type :: Analizador
         type(Token), dimension(:), allocatable :: listaTokens
         integer :: columna, fila, estado! Posiciön "X" | "Y"
         character(len=:), allocatable :: lexema
         character(len=100) :: typeLexema
+        logical :: correcto = .TRUE.
 
     contains
         procedure :: analizarCadena
         procedure :: printTokens
         procedure :: guardarDatos
         procedure :: reporteTokens
+        procedure :: reporteError
         procedure, private :: agregarToken
         procedure, private :: palabraReservada
     
@@ -87,6 +97,7 @@ contains
                 else ! Caracter sin reconocer
                     this%typeLexema = 'ERROR'
                     this%lexema = this%lexema // actual
+                    this%correcto = .FALSE.
                     call this%agregarToken()
                     this%columna =  this%columna + 1
                     
@@ -184,6 +195,7 @@ contains
             call this%agregarToken()
         else
             this%typeLexema = "ERROR"
+            this%correcto = .FALSE.
             call this%agregarToken()
         end if
         
@@ -191,7 +203,7 @@ contains
 
     subroutine agregarToken(this) ! Agrega el Token a la lista
         class(Analizador), intent(inout) :: this
-        class(Token), allocatable :: temp(:)
+        type(Token), allocatable :: temp(:)
         integer :: i
 
         if ( allocated(this%listaTokens) ) then
@@ -232,7 +244,7 @@ contains
     ! Los Objetos Continentes contendran las listas de paises de cada continente
     subroutine guardarDatos(this, miGrafica) 
         class(Analizador), intent(inout) :: this
-        class(Grafica), intent(inout) :: miGrafica
+        type(Grafica), intent(inout) :: miGrafica
         character(len=100) :: bloque, elemento, nombreElemento, banderaPais
         integer :: i, poblacion, saturacion
         i = 1
@@ -357,4 +369,48 @@ contains
         
     end subroutine reporteTokens
 
-end module AnalizadorModulo
+    subroutine reporteError(this) ! Crea el archivo html con los datos de los tokens
+        class(Analizador), intent(inout) :: this
+        integer :: i
+        
+        if ( SIZE(this%listaTokens) > 0 ) then
+
+            ! Abrir el archivo para escribir (crea el archivo si no existe)
+            open(unit=10, file="ERRORES.html", status="replace", action="write")
+            write(10, *) "<!DOCTYPE html><html><head><style>"
+            write(10, *) "#container{display: flex;}"
+            write(10, *) "#customers {font-family: Arial, Helvetica, sans-serif; border-collapse: collapse; width: 90%;margin: auto; }"
+            write(10, *) "#customers td,"
+            write(10, *) "#customers th { border: 1px solid #ddd;padding: 8px; }"
+            write(10, *) "#customers tr:nth-child(even) { background-color: #f2f2f2; }"
+            write(10, *) "#customers tr:hover { background-color: #ddd; }"
+            write(10, *) "#customers th { padding-top: 12px; padding-bottom: 12px; text-align: left; background-color: #04AA6D;color: white; }"
+            write(10, *) "</style></head><body>"
+            write(10, *) "<h1 style='text-align: center;'>Lista de errores</h1>"
+            write(10, *) "<div id='container'><table id='customers'>"
+            write(10, *) "<tr><th>No</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>"
+
+            do i = 1, SIZE(this%listaTokens)
+
+                if ( TRIM(this%listaTokens(i)%type) == 'ERROR' ) then
+                    
+                    write(10, *) "<tr>"
+                    write(10, *) "<th>", i ,"</th>"
+                    write(10, *) "<th>", TRIM(this%listaTokens(i)%lexema) ,"</th>"
+                    write(10, *) "<th>", TRIM(this%listaTokens(i)%type) ,"</th>"
+                    write(10, *) "<th>", this%listaTokens(i)%position_y ,"</th>"
+                    write(10, *) "<th>", this%listaTokens(i)%position_x ,"</th>"
+                    write(10, *) "</tr>"
+                        
+                end if
+
+            end do
+
+            write(10, *) " </table></div></body></html>"
+            
+            close(10)
+        end if
+        
+    end subroutine reporteError
+
+end module ModuloAnalizador

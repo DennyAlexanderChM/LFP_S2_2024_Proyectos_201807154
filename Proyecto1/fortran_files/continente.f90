@@ -1,4 +1,4 @@
-module ContinenteModulo
+module ModuloContinente
     implicit none
     public :: Pais, Continente
     type :: Pais
@@ -10,7 +10,7 @@ module ContinenteModulo
 
     type :: Continente
         character(len=100) :: nombre
-        real :: densidad
+        integer :: densidad
         type(Pais), dimension(:), allocatable :: paises
     contains
         procedure :: addPais
@@ -62,4 +62,4 @@ contains
     
     end subroutine densidadMedia
     
-end module ContinenteModulo
+end module ModuloContinente

@@ -1,5 +1,5 @@
-module GraficaModulo
-    use ContinenteModulo
+module ModuloGrafica
+    use ModuloContinente
     implicit none
     type, public :: Grafica
         character(len=100) :: nombreGrafica
@@ -9,6 +9,8 @@ module GraficaModulo
     contains
         procedure :: addContinente
         procedure :: addPaisContinente
+        procedure :: buscarPaisOptimo
+        procedure :: generarGrafo
         procedure :: printDates
         
     end type Grafica
@@ -16,10 +18,9 @@ module GraficaModulo
 contains
     subroutine addContinente(this,  nombreContinente)
         class(Grafica), intent(inout) :: this
-        class(Continente), allocatable :: temp(:)
+        type(Continente), allocatable :: temp(:)
         character(len = 100) :: nombreContinente
         integer :: i
-
         i = 0
 
         if ( allocated(this%listaContinentes) ) then
@@ -78,5 +79,115 @@ contains
         end do
         
     end subroutine printDates
+
+    subroutine buscarPaisOptimo(this)
+        class(Grafica), intent(inout) :: this
+        character(len = 100) :: nombrePais, banderaPais
+        integer :: i, j, densidadPais, habitantesPais, densidadContinente
+        type(Pais) :: tempPais
+        ! Inicializando variables
+        i = 1
+        nombrePais = ''
+        banderaPais = ''
+        densidadPais = 100
+        densidadContinente = 100
+        habitantesPais = 0
+
+        if ( SIZE(this%listaContinentes) > 0 ) then
+            do while (i <= SIZE(this%listaContinentes))
+                call this%listaContinentes(i)%densidadMedia() ! Obtenemos la densidad media del continente
+                j = 1
+                do while (j <= SIZE(this%listaContinentes(i)%paises))
+                    tempPais = this%listaContinentes(i)%paises(j)
+                    if ( tempPais%densidad < densidadPais ) then
+                        densidadPais = tempPais%densidad
+                        nombrePais = tempPais%nombre
+                        habitantesPais = tempPais%poblacion
+                        densidadContinente = this%listaContinentes(i)%densidad
+                        banderaPais = tempPais%bandera
+                    ! Si el porcentaje de densidad son los mismos
+                    else if ( tempPais%densidad == densidadPais ) then
+                        ! Se compara el porcentaje de densidad media del continente
+                        if ( this%listaContinentes(i)%densidad < densidadContinente) then
+                            densidadPais = tempPais%densidad
+                            nombrePais = tempPais%nombre
+                            habitantesPais = tempPais%poblacion
+                            densidadContinente = this%listaContinentes(i)%densidad
+                            banderaPais = tempPais%bandera
+                            
+                        end if
+                    end if
+                    j = j + 1
+                end do
+                i = i + 1
+            end do
+        end if
+        ! Imprimimos los datos encontrados
+        print *, TRIM(nombrePais) , ',' , habitantesPais ,  ',' , densidadPais , ',' , TRIM(banderaPais)
+        
+    end subroutine buscarPaisOptimo
+
+    subroutine generarGrafo(this)
+        class(Grafica), intent(in) :: this
+        character(len = 20) :: codColor
+        type(pais) :: tempPais
+        integer :: i, j
+        codColor = ""
+        i = 1
+
+        ! Abrir el archivo para escritura
+        open(unit=11, file='grafo.dot', status='unknown')
+        write(11,*) 'digraph G {'
+        write(11,*) '    A [label = ' , TRIM(this%nombreGrafica) , '];'
+        write(11,*) '    A [shape=Mdiamond];'
+
+        if ( SIZE(this%listaContinentes) > 0 ) then
+            do while (i <= SIZE(this%listaContinentes)) ! Recorremos la lista de 
+                codColor = codColorObtain(this%listaContinentes(i)%densidad)
+                write(11,*) '    ' , TRIM(this%listaContinentes(i)%nombre) , ' [shape=record, fillcolor=' , codColor , ' style=filled];'
+                write(11,*) '    ' , TRIM(this%listaContinentes(i)%nombre) , ' [label="{"+' , TRIM(this%listaContinentes(i)%nombre) , '+"| ' , this%listaContinentes(i)%densidad ,'}"];'
+                write(11,*) '    A -> ' , TRIM(this%listaContinentes(i)%nombre) , ';'
+
+                j = 1
+                do while (j <= SIZE(this%listaContinentes(i)%paises))
+                    tempPais = this%listaContinentes(i)%paises(j) ! Pais temporal
+                    codColor = codColorObtain(tempPais%densidad)
+                    write(11,*) '    ' , TRIM(tempPais%nombre) , ' [shape=record, fillcolor=' , codColor , ' style=filled];'
+                    write(11,*) '    ' , TRIM(tempPais%nombre) , ' [label="{"+' , TRIM(tempPais%nombre) ,'+"| ' , tempPais%densidad ,'}"];'
+                    write(11,*) '    ' ,TRIM(this%listaContinentes(i)%nombre), ' -> ' , TRIM(tempPais%nombre) , ';'  
+
+                    j = j + 1
+                end do
+                i = i + 1
+            end do
+        end if
+
+        write(11,*) '}'
+        ! Cerrar el archivo
+        close(11)
+
+        ! Llamar a Graphviz para crear la imagen PNG
+        call system("dot -Tpng grafo.dot -o GRAFICA.png")
+
+    end subroutine generarGrafo
     
-end module GraficaModulo
+    function codColorObtain(densidad) result(codColor)
+        integer, intent(in) :: densidad
+        character(len=20) :: codColor
+        if ( densidad >= 0 .AND.  densidad <= 15 ) then
+            codColor = 'white'
+        else if ( densidad >= 16 .AND.  densidad <= 30 ) then
+            codColor = 'blue'
+            else if ( densidad >= 31 .AND.  densidad <= 45 ) then
+            codColor = 'green'
+        else if ( densidad >= 46 .AND.  densidad <= 60 ) then
+            codColor = 'yellow'
+        else if ( densidad >= 61 .AND.  densidad <= 75 ) then
+            codColor = 'orange'
+        else if ( densidad >= 76 .AND.  densidad <= 100 ) then
+            codColor = 'red'
+        end if
+        
+    end function codColorObtain
+    
+end module ModuloGrafica

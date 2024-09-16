@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox as mbox, filedialog, scrolledtext
 from PIL import Image, ImageTk # Libreria para redimensionar las imagenes (grafos y banderas)
+import subprocess
 
 class MyAplication(tk.Tk):
     def __init__(self):
@@ -32,7 +33,7 @@ class MyAplication(tk.Tk):
         self.label_image_flag = tk.Label(self, borderwidth=2, relief="raised") # Label que contrendra la imagen de la bandera
         self.label_image_flag.place(x=630, y=375, width=120, height=80)
 
-        button = tk.Button(self, text="Analizar", width=12, command=self.aboutUs) # Botón que enviara el texto a analizar
+        button = tk.Button(self, text="Analizar", width=12, command=self.enviarDatos) # Botón que enviara el texto a analizar
         button.place(x=50, y=445)
 
     def menubar(self): # Función que crea un menu con las funciones del programa
@@ -56,6 +57,25 @@ class MyAplication(tk.Tk):
         # Despliega una alerta con los datos del desarrollador
         mbox.showinfo("Acerca de", "Soluciones Modernas S.A\nVersión 1.0\nDesarrollado por Denny Chalí") 
     
+    def enviarDatos(self):
+        text = self.text_area.get(1.0, tk.END)
+        
+        if text != '':
+            resultado = subprocess.run(
+
+                ["./main.exe"],  # Ejecutable compilado
+                input=text,
+                stdout=subprocess.PIPE,  # Capturar la salida del programa
+                text=True  # Asegurarse de que la salida se maneje como texto
+                )
+            
+            if resultado.stdout.strip() != 'Error':
+                print(resultado.stdout.strip())
+                mbox.showinfo("Correcto", "!Analisis realizado correctamente!")
+            else:
+                # Despliega una alerta con los datos del desarrollador
+                mbox.showerror("Error", "!A ocurrido un error al analizar la información!")
+
     def openFile(self):
 
         self.text_area.delete(1.0, tk.END)  # Borra el contenido del cuadro de texto
