@@ -6,10 +6,10 @@ grafica: {
                             nombre: "Japon";
                             poblacion: 2352342;
                             saturacion:80%;
-                            bandera: "C:\imagen.jpg";
+                            bandera: "test_files\banderas\japon.png";
                     }
-                    pais: {
-                            bandera: "C:\imagen.jpg";
+                    pais: { 
+                            bandera: "test_files\banderas\china.png";
                             nombre: "China";
                             poblacion: 1350000000;
                             saturacion:95%;
@@ -18,7 +18,7 @@ grafica: {
                             saturacion:40%;
                             poblacion: 2352342;
                             nombre:"Korea";
-                            bandera: "C:\imagen.jpg";
+                            bandera: "test_files\banderas\korea.png";
                     }
             }
             continente {
@@ -27,19 +27,19 @@ grafica: {
                             nombre: "Canada";
                             poblacion: 23423423;
                             saturacion:65%;
-                            bandera: "C:\imagen.jpg"
+                            bandera: "test_files\banderas\canada.png";
                     }
                     pais: {
                             poblacion: 17263239;
                             nombre: "Guatemala";
                             saturacion:40%;
-                            bandera: "C:\guate.jpg"
+                            bandera: "test_files\banderas\guatemala.png";
                     }
                     pais: {
                             saturacion:60%;
                             nombre:"Chile";
                             poblacion: 235234234;
-                            bandera: "C:\imagen.jpg"
+                            bandera: "test_files\banderas\chile.png"
                     }
             }
 }

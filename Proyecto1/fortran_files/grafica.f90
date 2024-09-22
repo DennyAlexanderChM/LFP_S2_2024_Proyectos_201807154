@@ -19,7 +19,7 @@ contains
     subroutine addContinente(this,  nombreContinente)
         class(Grafica), intent(inout) :: this
         type(Continente), allocatable :: temp(:)
-        character(len = 100) :: nombreContinente
+        character(len = 100), intent(in) :: nombreContinente
         integer :: i
         i = 0
 

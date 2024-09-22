@@ -4,7 +4,7 @@ module ModuloAnalizador
     private :: isalpha, isdigit, Token
     public :: Analizador, analizarCadena
     
-    type ::Token
+    type ::Token ! Type Token
         character(len = 100) :: lexema
         character(len = 100) :: type
         integer :: position_x
@@ -13,24 +13,27 @@ module ModuloAnalizador
     end type Token
 
     type :: Analizador
+        ! Declaramos las variables del type Analizador
         type(Token), dimension(:), allocatable :: listaTokens
-        integer :: columna, fila, estado! Posiciön "X" | "Y"
+        integer :: columna, fila, estado, columnaLexema! Posiciön "X" | "Y"
         character(len=:), allocatable :: lexema
         character(len=100) :: typeLexema
         logical :: correcto = .TRUE.
 
-    contains
-        procedure :: analizarCadena
-        procedure :: printTokens
-        procedure :: guardarDatos
-        procedure :: reporteTokens
-        procedure :: reporteError
-        procedure, private :: agregarToken
-        procedure, private :: palabraReservada
+    contains ! Procedimientos del type Analizador 
+        procedure :: analizarCadena ! Recibe la cadena de caracteres para análizar su contenido
+        ! procedure :: printTokens (Solo si se ejecuta el main.f90 directamente)
+        procedure :: guardarDatos ! Recibe guarda los tokens en sub types
+        procedure :: reporteTokens ! Genera el archivo HTML (Solo si no se encontraron errores)
+        procedure :: reporteError ! Genera el archivo HTML de errores (Solo si se encontraron errores)
+        ! Procedimientos privades
+        procedure, private :: agregarToken ! Agrega el token a la lista
+        procedure, private :: palabraReservada ! Verifica si el Lexema es una palabra reservada
     
     end type Analizador
 contains
     subroutine analizarCadena(this, cadena, fila)
+        ! Declaracion de variables
         class(Analizador), intent(inout) :: this
         character(len=200), intent(in) :: cadena
         integer, intent(in) :: fila
@@ -38,111 +41,148 @@ contains
         ! Inicializamos variables
         character :: actual = ''
         this%columna = 1
+        this%columnaLexema = 1
         this%estado = 0
         this%fila = fila
         this%lexema = ''
         cadenaNueva = TRIM(cadena) // '#' ! Fin de cadena
 
-        do while (this%columna <= LEN(cadenaNueva))
-            actual = cadena(this%columna:this%columna)
+        do while (this%columna <= LEN_TRIM(cadenaNueva)) ! Recorremos la cadena recibida
+            actual = cadenaNueva(this%columna:this%columna) ! Caracter actual
 
             if ( this%estado == 0 ) then ! Si el estado es cero
-                if ( isalpha(actual) ) then ! Verifica si el caracter es un caracter alfabetico
-                    this%estado = 1
+                if ( isalpha(actual) ) then ! Verifica si el caracter es alfabetico [A-Za-z]
+                    this%estado = 2 ! Estado 2 cadenas
                     this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
                     this%columna = this%columna + 1
                 
-                else if ( isdigit(actual) ) then ! Verifica si el caracter es numerico
-                    this%estado = 3
+                else if ( isdigit(actual) ) then ! Verifica si el caracter es numerico [0-9]
+                    this%estado = 3 ! Estado 3 enteros
                     this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
                     this%columna = this%columna + 1
 
                 else if (actual == '"') then ! Verifica si es inicio de una cadena
-                    this%estado = 2
+                    this%estado = 4 ! Estado 4 incio de cadena
                     this%lexema = this%lexema //actual
+                    this%columnaLexema = this%columna
                     this%columna = this%columna + 1
 
                 else if (actual == ':') then ! Dos puntos
-                    this%typeLexema = 'DOS PUNTOS'
+                    this%estado = 1 ! Estado 1 simbolos o separadores
+                    this%typeLexema = 'DOS_PUNTOS'
                     this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
                     call this%agregarToken()
                     this%columna =  this%columna + 1
 
                 else if (actual == '{') then ! Llave abre
-                    this%typeLexema = 'LLAVE ABRE'
+                    this%estado = 1 ! Estado 1 simbolos o separadores
+                    this%typeLexema = 'LLAVE_ABRE'
                     this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
                     call this%agregarToken()
                     this%columna =  this%columna + 1
                 
                 else if (actual == '}') then ! Llave cierra
-                    this%typeLexema = 'LLAVE CIERRA'
+                    this%estado = 1 ! Estado 1 simbolos o separadores
+                    this%typeLexema = 'LLAVE_CIERRA'
                     this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
                     call this%agregarToken()
                     this%columna = this%columna + 1
                 
                 else if (actual == ';') then ! Punto y coma
-                    this%typeLexema = 'PUNTO COMA'
+                    this%estado = 1 ! Estado 1 simbolos o separadores
+                    this%typeLexema = 'PUNTO_COMA'
                     this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
                     call this%agregarToken()
                     this%columna =  this%columna + 1
 
-                else if (actual == '#') then ! Fin de cadena
-                    this%estado = 0
-                    exit
-
-                else if (actual == ' ' .OR. actual == '\n' .OR. actual == '\r') then 
-                    this%estado = 0
+                else if (actual == '%') then ! Punto y coma
+                    this%estado = 1 ! Estado 1 simbolos o separadores
+                    this%typeLexema = 'PORCENTAJE'
+                    this%lexema = this%lexema // actual
+                    this%columnaLexema = this%columna
+                    call this%agregarToken()
                     this%columna =  this%columna + 1
                 
+                else if (actual == '#' .AND. this%columna == LEN_TRIM(cadenaNueva) ) then ! Fin de cadena
+                    exit
+                    ! char(9) tabulaciones, char(12) salto de pagina, char(13) retorno de carro
+                else if (actual == ' ' .OR. actual == CHAR(9) .OR. actual == CHAR(12) .OR. actual == CHAR(13)) then 
+                    this%estado = 0
+                    this%lexema = ''
+                    this%columna =  this%columna + 1
+
                 else ! Caracter sin reconocer
+                    this%typeLexema = 'ERROR' 
+                    this%lexema = this%lexema // actual
+                    this%correcto = .FALSE.
+                    this%columnaLexema = this%columna
+                    call this%agregarToken()
+                    this%columna =  this%columna + 1
+                    
+                end if
+            ! -------------------------------------------------
+            ! Maneja el estado 2 (Letras)
+            else if ( this%estado == 2 ) then 
+                if ( isalpha(actual) ) then ! Verifica sin son letras
+                    this%estado = 2 ! Estado 2 letras
+                    this%lexema = this%lexema // actual
+                    this%columna = this%columna + 1    
+                
+                else
+                    ! Si el caracter actual no es una letra se verifica si el lexema es una palabra reservada
+                    call this%palabraReservada()
+                end if
+            ! -------------------------------------------------
+            ! Maneja el estado 3 (Enteros)
+            else if ( this%estado == 3 ) then
+                if ( isdigit(actual) ) then
+                    this%estado = 3 ! Estado 3 (Enteros)
+                    this%lexema = this%lexema // actual
+                    this%columna = this%columna + 1
+            
+                else
+                    this%typeLexema = 'ENTERO'
+                    call this%agregarToken()
+
+                end if
+            ! -------------------------------------------------
+            ! Maneja el estado 4 (Cadena de caracteres)
+            else if ( this%estado == 4 ) then
+                if ( actual /= '"' ) then ! Verifica si el caracter actual es diferente de "
+                    this%estado = 5 ! Estado 5 (caracter diferente de ")
+                    this%lexema = this%lexema // actual
+                    this%columna = this%columna + 1
+                    
+                else ! En caso de cadena vacia guardar error
                     this%typeLexema = 'ERROR'
                     this%lexema = this%lexema // actual
                     this%correcto = .FALSE.
+                    this%columnaLexema = this%columna
                     call this%agregarToken()
                     this%columna =  this%columna + 1
-                    
                 end if
-            else if ( this%estado == 1 ) then ! Maneja el estado 1 (Palabras)
-                if ( isalpha(actual) ) then ! Verifica sin son letras
-                    this%estado = 1
-                    this%lexema = this%lexema // actual
-                    this%columna = this%columna + 1
-                
-                else
-                    call this%palabraReservada()
-                    
-                end if
-            else if ( this%estado == 2 ) then ! Maneja el  estado 2 (Cadenas)
+            ! -------------------------------------------------
+            ! Maneja el estado 5 (Cualquier caracter excepto ")
+            else if ( this%estado == 5 ) then
                 if ( actual /= '"' ) then
-                    this%estado = 2
+                    this%estado = 5 ! Estado 5 (Cualquier caracter excepto ")
                     this%lexema = this%lexema // actual
                     this%columna = this%columna + 1
                     
                 else
+                    this%estado = 6 ! Estado 6 (Aceptación de cadena)
                     this%typeLexema = 'CADENA'
                     this%lexema = this%lexema // actual
                     call this%agregarToken()
                     this%columna = this%columna + 1
                 end if
-                
-            else if ( this%estado == 3 ) then !Maneja el estado 3 (Numeros)
-                if ( isdigit(actual) ) then
-                    this%estado = 3
-                    this%lexema = this%lexema // actual
-                    this%columna = this%columna + 1
 
-                else if ( actual == '%') then
-                    this%typeLexema = 'PORCENTAJE'
-                    this%lexema = this%lexema // actual
-                    call this%agregarToken()
-                    this%columna = this%columna + 1
-                
-                else
-                    this%typeLexema = 'ENTERO'
-                    call this%agregarToken()
-                    
-                end if
-            
             end if
 
         end do
@@ -178,7 +218,7 @@ contains
 
     subroutine palabraReservada(this) ! Verifica si la cadena es una palabra reservada
         class(Analizador), intent(inout) :: this
-        this%typeLexema = 'PALABRA RESERVADA'
+        this%typeLexema = 'PALABRA_RESERVADA'
         if ( TRIM(this%lexema) == "grafica" ) then
             call this%agregarToken()
         else if ( TRIM(this%lexema) == "nombre" ) then
@@ -203,27 +243,27 @@ contains
 
     subroutine agregarToken(this) ! Agrega el Token a la lista
         class(Analizador), intent(inout) :: this
-        type(Token), allocatable :: temp(:)
+        type(Token), allocatable :: temp(:) ! Lista temporal de dimensión indefinida
         integer :: i
 
-        if ( allocated(this%listaTokens) ) then
-            i = SIZE(this%listaTokens) + 1
-            allocate(temp(i-1))
-            temp = this%listaTokens
-            deallocate(this%listaTokens)
-            allocate(this%listaTokens(i))
-            this%listaTokens(1:i-1) = temp
-            deallocate(temp)
+        if ( allocated(this%listaTokens) ) then ! Verifica si la lista tiene dimension definida
+            i = SIZE(this%listaTokens) + 1 ! Obtenemos su dimension + 1
+            allocate(temp(i-1)) ! Definimos la dimension de la lista temporal
+            temp = this%listaTokens ! Copiamos la lista de tokens a la lista temporal
+            deallocate(this%listaTokens) ! Liberamos el espacio en memoria de la lista de tokens
+            allocate(this%listaTokens(i)) ! Asignamos la nueva dimensión de la lista de tokens
+            this%listaTokens(1:i-1) = temp ! Copiamos los datos almacenados en lista temporal a la lista de tokens
+            deallocate(temp) ! Liberamos el espacio en memoria de la lista temporal
         else
-            i = 1
+            i = 1 ! Si la lista no tiene ningun elemento
             allocate(this%listaTokens(i))
         end if
-
+        ! Asignamos calores al elemento de la lista
         this%listaTokens(i)%lexema = this%lexema
         this%listaTokens(i)%type = this%typeLexema
-        this%listaTokens(i)%position_x = this%columna
+        this%listaTokens(i)%position_x = this%columnaLexema
         this%listaTokens(i)%position_y = this%fila
-
+        ! Reiniciamos los datos del lexema y el estado
         this%lexema = ''
         this%estado = 0
         
@@ -256,19 +296,19 @@ contains
         nombreElemento = ''
 
         do while (i <= SIZE(this%listaTokens))
-            if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'grafica') then
+            if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'grafica') then
                 bloque = 'grafica'
-            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'continente' ) then
+            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'continente' ) then
                 bloque = 'continente'
-            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'pais' ) then
+            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'pais' ) then
                 bloque = 'pais'
-            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'nombre' ) then
+            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'nombre' ) then
                 elemento = 'nombre'
-            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'poblacion' ) then
+            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'poblacion' ) then
                 elemento = 'poblacion'
-            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'saturacion' ) then
+            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'saturacion' ) then
                 elemento = 'saturacion'
-            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'bandera' ) then
+            else if ( TRIM(this%listaTokens(i)%type) == 'PALABRA_RESERVADA' .AND. TRIM(this%listaTokens(i)%lexema) == 'bandera' ) then
                 elemento = 'bandera'
             end if
 
@@ -278,9 +318,8 @@ contains
             else if ( TRIM(this%listaTokens(i)%type) == 'ENTERO' .AND. elemento == 'poblacion' ) then
                 read(this%listaTokens(i)%lexema, *)  poblacion
                 elemento = ''
-            else if ( TRIM(this%listaTokens(i)%type) == 'PORCENTAJE' .AND. elemento == 'saturacion' ) then
-                elemento = obtenerSaturacion(this%listaTokens(i)%lexema)
-                read(elemento, *)  saturacion
+            else if ( TRIM(this%listaTokens(i)%type) == 'ENTERO' .AND. elemento == 'saturacion' ) then
+                read(this%listaTokens(i)%lexema, *)  saturacion
                 elemento = ''
             else if ( TRIM(this%listaTokens(i)%type) == 'CADENA' .AND. elemento == 'bandera' ) then
                 banderaPais = this%listaTokens(i)%lexema
@@ -308,25 +347,6 @@ contains
         end do
         
     end subroutine guardarDatos
-
-    function obtenerSaturacion(saturacion) result(porcentajeSaturacion)
-        character(len = 100), intent(in) :: saturacion
-        character(len = :), allocatable :: porcentajeSaturacion
-        character :: actual
-        integer :: i
-        actual = ''
-
-        ! Recorremos la cadena original carácter por carácter
-        do i = 1, len_trim(saturacion)
-            actual = saturacion(i:i)
-      
-            ! Si el carácter no es uno de los que queremos eliminar, lo añadimos a la cadena limpia
-            if (isdigit(actual)) then
-                porcentajeSaturacion = trim(porcentajeSaturacion) // actual
-            end if
-        end do
-        
-    end function obtenerSaturacion
     
     subroutine reporteTokens(this) ! Crea el archivo html con los datos de los tokens
         class(Analizador), intent(inout) :: this
@@ -347,7 +367,7 @@ contains
             write(10, *) "</style></head><body>"
             write(10, *) "<h1 style='text-align: center;'>Listado de Tokens</h1>"
             write(10, *) "<div id='container'><table id='customers'>"
-            write(10, *) "<tr><th>No</th><th>Lexema</th><th>Tipo</th><th>Fila</th><th>Columna</th></tr>"
+            write(10, *) "<tr><th>No</th><th>Lexema</th><th>Tipo</th><th>Columna</th><th>Fila</th></tr>"
 
             do i = 1, SIZE(this%listaTokens)
 
@@ -371,7 +391,8 @@ contains
 
     subroutine reporteError(this) ! Crea el archivo html con los datos de los tokens
         class(Analizador), intent(inout) :: this
-        integer :: i
+        integer :: i, numTokens
+        numTokens = 1
         
         if ( SIZE(this%listaTokens) > 0 ) then
 
@@ -395,12 +416,14 @@ contains
                 if ( TRIM(this%listaTokens(i)%type) == 'ERROR' ) then
                     
                     write(10, *) "<tr>"
-                    write(10, *) "<th>", i ,"</th>"
+                    write(10, *) "<th>", numTokens ,"</th>"
                     write(10, *) "<th>", TRIM(this%listaTokens(i)%lexema) ,"</th>"
                     write(10, *) "<th>", TRIM(this%listaTokens(i)%type) ,"</th>"
                     write(10, *) "<th>", this%listaTokens(i)%position_y ,"</th>"
                     write(10, *) "<th>", this%listaTokens(i)%position_x ,"</th>"
                     write(10, *) "</tr>"
+
+                    numTokens = numTokens + 1 
                         
                 end if
 
