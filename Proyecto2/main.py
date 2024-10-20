@@ -21,16 +21,15 @@ class MyAplication(tk.Tk):
         menubar = self.menubar()
         self.configure(menu=menubar)
         #Text area que mostrara el texto leído
-        self.text_area = tk.Text(self, wrap="word", undo=True, font = ("Roboto", 11), relief="flat")
+        self.text_area = tk.Text(self, wrap="word", undo=True, font = ("Roboto", 10), relief="flat")
         self.text_area.bind("<<Modified>>", self.on_text_change) # Detecta si se efectuan cambios en el text_area
-        self.text_area.place(x=200, y=30, width=600, height=250) # Modificamos su posición y tamaño
-        
+        self.text_area.place(x=190, y=30, width=620, height=250) # Modificamos su posición y tamaño
         self.frame = tk.Frame(self) # Frame que almacenará la tabla de datos 
         self.frame.place(x=40, y=300)
         
         # Crear una etiqueta para mostrar la posición
-        self.position_label = tk.Label(self, text="Fila: 1, Columna: 0")
-        self.position_label.place(x= 50, y= 50)
+        self.position_label = tk.Label(self, text="Fila: 1, Columna: 0", font = ("Roboto", 12), relief="groove")
+        self.position_label.place(x= 20, y= 140)
         
         # Vincular eventos de tecla y clic para actualizar la posición
         self.text_area.bind('<KeyRelease>', self.update_position)
@@ -39,7 +38,7 @@ class MyAplication(tk.Tk):
         # Definir las columnas de la tabla
         columns = ("tipo", "linea", "columna", "token", "descripcion")
         # Crear el widget Treeview con las columnas
-        self.tree = ttk.Treeview(self.frame, columns=columns, show="headings", height=10)
+        self.tree = ttk.Treeview(self.frame, columns=columns, show="headings", height=12)
         # Definir los encabezados de las columnas
         self.tree.heading("tipo", text="Tipo")
         self.tree.heading("linea", text="Línea")
@@ -103,7 +102,7 @@ class MyAplication(tk.Tk):
                 mbox.showerror("Error", "!Ha ocurrido un error al analizar la información!") # Mensaje emergente (error)
                 # Leer el archivo línea por línea
                 try:
-                    with open('errores.txt', 'r', encoding='utf-8') as archivo:
+                    with open('errores.txt', 'r') as archivo:
                         for linea in archivo:
                             datos = linea.strip().split('&&')  # Asume que las columnas están separadas por comas
                             
@@ -201,7 +200,7 @@ class MyAplication(tk.Tk):
         tree.column("Columna", width=100)
 
         try:
-            with open('tokens.txt', 'r', encoding='utf-8') as archivo:
+            with open('tokens.txt', 'r') as archivo:
                 for linea in archivo:
                     datos = linea.strip().split('&&')  # Asume que las columnas están separadas por comas
                     # Insertar los datos en la tabla       

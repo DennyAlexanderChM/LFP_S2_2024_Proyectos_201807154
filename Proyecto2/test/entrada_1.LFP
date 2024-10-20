@@ -1,5 +1,4 @@
 <!--Controles
-!hello
     // Este bloque tambien puede recibir comentarios
     Contenedor contlogin;
     Contenedor contFondo;
@@ -8,7 +7,7 @@
     Etiqueta passw;
     Etiqueta Nombre; 
     Texto Texto0;
-    Contenedor contlogo2; @
+    Contenedor contlogo2;
     Contenedor ContLogo1;
     Contenedor ContBody;
  Controles-->
@@ -91,6 +90,7 @@ Propiedades -->
     ContBody.setPosicion(23,21);
     this.add(ContBody);
 Colocacion -->
+
 
 
 

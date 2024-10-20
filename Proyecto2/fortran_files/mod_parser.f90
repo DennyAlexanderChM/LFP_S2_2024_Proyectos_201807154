@@ -298,8 +298,19 @@ contains
         
     end subroutine elemento_posicion
 
-    subroutine match(type_mach)
+    recursive subroutine match(type_mach)
         integer, intent(in) :: type_mach
+
+        if ( vistazo%type == ERROR .OR. vistazo%type == COMENTARIO ) then
+
+            do while ( vistazo%type == ERROR .OR. vistazo%type == COMENTARIO )
+
+                num_pos = num_pos + 1
+                vistazo = tokens(num_pos)
+                
+            end do
+            
+        end if
         
         if ( vistazo%type /= type_mach) then
 
@@ -388,7 +399,7 @@ contains
             case (RESERVADA_PROPIEDAD_POSICION)
                 token_ = 'RESERVADA_PROPIEDAD_POSICION'
             case (RESERVADA_COLOCACION)
-                token_ = 'RESERVADA_PROPIEDAD_COLOCACION'
+                token_ = 'RESERVADA_COLOCACION'
             case (RESERVADA_THIS)
                 token_ = 'RESERVADA_THIS'
             case (RESERVADA_ADD)

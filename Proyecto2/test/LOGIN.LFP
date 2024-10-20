@@ -3,7 +3,7 @@
 	Contenedor cont_body;
 	Contenedor cont_login;
 	Etiqueta label_inicio;
-	Etiqueta label_usuario; ?¿
+	Etiqueta label_usuario;
 	Texto text_usuario;
 	Etiqueta label_pass;
 	Clave pass_usuario;
@@ -100,3 +100,4 @@ Propiedades -->
 	this.add(cont_footer);
 
 Colocacion -->
+

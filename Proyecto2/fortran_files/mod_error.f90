@@ -18,9 +18,9 @@ module ModuloError
         
     contains
 
-    procedure, private :: text_error
+    procedure :: text_error
     procedure :: agregar_error
-    procedure:: agregar_error_lexico
+    procedure :: agregar_error_lexico
 
     end type Error_List
 
@@ -94,7 +94,7 @@ contains
         if ( SIZE(this%lista_errores) > 0 ) then
 
             ! Abrir el archivo para escribir (crea el archivo si no existe)
-            open(unit=10, file="errores.txt", status="replace", action="write")
+            open(unit=10, file="errores.txt", status="replace", action="write", form="formatted")
           
             do i = 1, SIZE(this%lista_errores)
 

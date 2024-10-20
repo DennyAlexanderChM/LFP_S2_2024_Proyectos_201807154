@@ -65,7 +65,7 @@ program main
         num_error = 1
 
         ! Abrir el archivo para escribir (crea el archivo si no existe)
-        open(unit=12, file="tokens.txt", status="replace", action="write")
+        open(unit=12, file="tokens.txt", status="replace", action="write", form="formatted")
           
         if ( allocated(lista_tokens) ) then ! Verifica si la lista de tokens fue inicializada
             
@@ -84,4 +84,3 @@ program main
     end subroutine text_token
         
 end program main
-!  gfortran main.f90 mod_elemento.f90 mod_lexico.f90 mod_parser.f90 mod_token.f90 mod_traductor.f90 -o main
