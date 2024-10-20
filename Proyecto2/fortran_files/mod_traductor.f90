@@ -46,6 +46,7 @@ contains
 
                 case default
                     continue
+                    
             end select
             
             if ( bloque == 'CONTROLES' ) then
@@ -268,6 +269,16 @@ contains
         
         listaControles(i)%tipo_elemento = tipo_control
         listaControles(i)%ID = ID_control
+
+        if ( tipo_control == RESERVADA_BOTON ) then
+            listaControles(i)%ancho = '100'
+            listaControles(i)%largo = '25'
+        
+        else if ( tipo_control == RESERVADA_TEXTO .OR. tipo_control == RESERVADA_CLAVE ) then
+            listaControles(i)%ancho = '100'
+            listaControles(i)%largo = '20'
+
+        end if
         
     end subroutine nuevo_control
 
@@ -286,7 +297,6 @@ contains
                 select case (tipo_propiedad)
                     case (RESERVADA_PROPIEDAD_COLOR_LETRA)
                         listaControles(i)%RGB_texto = valor_propiedad
-                        print*, valor_propiedad
                     case (RESERVADA_PROPIEDAD_TEXTO)
                         listaControles(i)%texto = valor_propiedad
                     case (RESERVADA_PROPIEDAD_ALINEACION)
@@ -349,8 +359,8 @@ contains
         if ( SIZE(listaControles) > 0 ) then
 
             ! Abrir el archivo para escribir (crea el archivo si no existe)
-            open(unit=10, file='TOKENS.html', status='replace', action='write')
-            write(10, *) '<!DOCTYPE html><html><head><link rel="stylesheet" href="style.css"><title>ESTA ES UNA PRUEBA</title></head><body>'
+            open(unit=10, file='page/mipagina.html', status='replace', action='write')
+            write(10, *) '<!DOCTYPE html><html><head><link rel="stylesheet" href="style.css"><title>Mi pagina web</title></head><body>'
 
             do while ( i <= SIZE(listaControles))
 
@@ -413,7 +423,7 @@ contains
         if ( SIZE(listaControles) > 0 ) then
 
             ! Abrir el archivo para escribir (crea el archivo si no existe)
-            open(unit=11, file='style.css', status='replace', action='write')
+            open(unit=11, file='page/style.css', status='replace', action='write')
             do while ( i <= SIZE(listaControles))
 
                 write(11, *) '#',TRIM(listaControles(i)%ID) ,'{' ! Ejemplo: #JTextField0 {

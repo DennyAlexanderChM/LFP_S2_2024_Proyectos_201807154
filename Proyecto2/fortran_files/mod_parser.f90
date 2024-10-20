@@ -1,13 +1,16 @@
 module ModuloAnalizadorSintactico
+
     use ModuloToken
+    use ModuloError
     implicit none
     private
-    public parser
+    public parser, tipo_token
     ! Variables del modulo
     type(Token), dimension(:), allocatable :: tokens
     integer :: num_pos
     type(Token) :: vistazo
     logical :: vacio
+
 contains
     subroutine parser(listaTokens)
         type(Token), dimension(:), allocatable :: listaTokens
@@ -26,7 +29,7 @@ contains
     end subroutine inicio
 
     subroutine bloque_controles()
-        call match(SIGNO_MAYOR) ! <
+        call match(SIGNO_MENOR) ! <
         call match(SIGNO_EXCLAMACION) ! <
         call match(SIGNO_GUION) ! <
         call match(SIGNO_GUION)
@@ -35,7 +38,7 @@ contains
         call match(RESERVADA_CONTROLES) ! CONTROLES
         call match(SIGNO_GUION) ! <
         call match(SIGNO_GUION) ! <
-        call match(SIGNO_MENOR) ! <
+        call match(SIGNO_MAYOR) ! <
     end subroutine bloque_controles
 
     recursive subroutine lista_controles()
@@ -48,17 +51,16 @@ contains
 
     recursive subroutine elemento_control()
         if ( vistazo%type /= COMENTARIO )  then
-            if ( vistazo%type /= RESERVADA_CONTROLES ) then
+            if ( vistazo%type /= RESERVADA_CONTROLES .AND. num_pos < SIZE(tokens)) then
                 call tipo_elemento_control()
                 call match(IDENTIFICADOR)
                 call match(SIGNO_PUNTO_COMA)
             else
                 vacio = .TRUE.
             end if
-            
         else
             num_pos = num_pos + 1
-            vistazo = Tokens(num_pos)
+            vistazo = tokens(num_pos)
         end if
     end subroutine elemento_control
 
@@ -80,16 +82,18 @@ contains
                 call match(RESERVADA_CLAVE)
             case (RESERVADA_CONTENEDOR)
                 call match(RESERVADA_CONTENEDOR)
+            case (RESERVADA_CONTROLES)
+                vacio = .TRUE.
             case default
-                print *, "Error sintactico: Tipo de control no valido."
-                call panicModeRecovery(RESERVADA_CONTENEDOR, IDENTIFICADOR)
-            
+                
+                call panicModeRecovery(RESERVADA_CONTROLES, SIGNO_PUNTO_COMA, SIGNO_GUION)
+                
         end select
         
     end subroutine tipo_elemento_control
 
     subroutine bloque_propiedades()
-        call match(SIGNO_MAYOR) ! <
+        call match(SIGNO_MENOR) ! <
         call match(SIGNO_EXCLAMACION) ! <
         call match(SIGNO_GUION) ! <
         call match(SIGNO_GUION)
@@ -98,7 +102,7 @@ contains
         call match(RESERVADA_PROPIEDADES) ! CONTROLES
         call match(SIGNO_GUION) ! <
         call match(SIGNO_GUION) ! <
-        call match(SIGNO_MENOR) ! <
+        call match(SIGNO_MAYOR) ! <
     end subroutine bloque_propiedades
 
     recursive subroutine lista_propiedades()
@@ -112,7 +116,7 @@ contains
     recursive subroutine elemento_propiedad()
         if ( vistazo%type /= COMENTARIO )  then
 
-            if ( vistazo%type /= RESERVADA_PROPIEDADES ) then
+            if ( vistazo%type /= RESERVADA_PROPIEDADES .AND. num_pos < SIZE(tokens) ) then
                 call match(IDENTIFICADOR)
                 call match(SIGNO_PUNTO)
                 call tipo_elemento_propiedad()
@@ -123,7 +127,7 @@ contains
             
         else
             num_pos = num_pos + 1
-            vistazo = Tokens(num_pos)
+            vistazo = tokens(num_pos)
         end if
     end subroutine elemento_propiedad
 
@@ -170,8 +174,8 @@ contains
                 call match(ENTERO)
                 call match(PARENTESIS_CIERRA)
             case default
-                print *, "Error sintactico: Tipo de control no valido."
-                call panicModeRecovery(RESERVADA_PROPIEDADES, IDENTIFICADOR)
+                
+                call panicModeRecovery(RESERVADA_PROPIEDADES,SIGNO_PUNTO_COMA, SIGNO_GUION)
             
         end select
         
@@ -195,8 +199,9 @@ contains
             case (RESERVADA_DERECHA)
                 call match(RESERVADA_DERECHA)
             case default
-                print *, "Error sintactico: Tipo de control no valido."
-            
+
+                call panicModeRecovery(RESERVADA_CONTROLES, SIGNO_PUNTO_COMA, SIGNO_GUION)
+        
         end select
         
     end subroutine propiedad_alineacion
@@ -208,23 +213,24 @@ contains
             case (RESERVADA_FALSE)
                 call match(RESERVADA_FALSE)
             case default
-                print *, "Error sintactico: Tipo de control no valido."
+
+                call panicModeRecovery(RESERVADA_CONTROLES, SIGNO_PUNTO_COMA, SIGNO_GUION)
             
         end select
         
     end subroutine propiedad_valor
 
     subroutine bloque_colocacion()
-        call match(SIGNO_MAYOR) ! <
+        call match(SIGNO_MENOR) ! <
         call match(SIGNO_EXCLAMACION) ! <
         call match(SIGNO_GUION) ! <
         call match(SIGNO_GUION)
-        call match(RESERVADA_COLOCACION) ! CONTROLES
+        call match(RESERVADA_COLOCACION) ! POSICION
         call lista_posicionamiento()
-        call match(RESERVADA_COLOCACION) ! CONTROLES
+        call match(RESERVADA_COLOCACION) ! POSICION
         call match(SIGNO_GUION) ! <
         call match(SIGNO_GUION) ! <
-        call match(SIGNO_MENOR) ! <
+        call match(SIGNO_MAYOR) ! <
     end subroutine bloque_colocacion
 
     recursive subroutine lista_posicionamiento()
@@ -249,11 +255,9 @@ contains
             
         else
             num_pos = num_pos + 1
-            vistazo = Tokens(num_pos)
+            vistazo = tokens(num_pos)
         end if
     end subroutine detalles_posicionamiento
-
-
 
     subroutine elemento_identificador()
         select case (tokens(num_pos)%type)
@@ -262,8 +266,8 @@ contains
             case (IDENTIFICADOR)
                 call match(IDENTIFICADOR)
             case default
-                print *, "Error sintactico: Tipo de control no valido."
-                call panicModeRecovery(RESERVADA_COLOCACION, SIGNO_PUNTO)
+
+                call panicModeRecovery(IDENTIFICADOR, SIGNO_PUNTO, SIGNO_PUNTO_COMA)
         
         end select
     end subroutine elemento_identificador
@@ -281,8 +285,7 @@ contains
                 call match(IDENTIFICADOR)
                 call match(PARENTESIS_CIERRA)
             case default
-                print *, "Error sintactico: Tipo de control no valido."
-                call panicModeRecovery(RESERVADA_COLOCACION, SIGNO_PUNTO)
+                call panicModeRecovery(RESERVADA_COLOCACION, SIGNO_GUION, SIGNO_PUNTO_COMA)
         
         end select
         
@@ -297,29 +300,49 @@ contains
 
     subroutine match(type_mach)
         integer, intent(in) :: type_mach
-        if ( vistazo%type == type_mach) then
-            ! print *, TRIM(vistazo%lexema)
-            vacio = .FALSE.
-            num_pos = num_pos + 1
-            vistazo = Tokens(num_pos)
-                
-        else
-            print *, 'Ocurrio un error, se esperaba ', TRIM(tipo_token(type_mach))
+        
+        if ( vistazo%type /= type_mach) then
 
-            call panicModeRecovery(type_mach, SIGNO_PUNTO_COMA)
+            vacio = .TRUE.
+
+            call panicModeRecovery(type_mach, SIGNO_PUNTO_COMA, SIGNO_GUION)
             
+            return
 
         end if
-        
+        if ( num_pos < SIZE(tokens)) then
+
+            vacio = .FALSE.
+            num_pos = num_pos + 1
+            vistazo = tokens(num_pos)
+            
+        end if
+      
     end subroutine match
 
-    subroutine panicModeRecovery(token_esperado, punto_sincronizacion)
+    subroutine panicModeRecovery(token_esperado, punto_sincronizacion_1,punto_sincronizacion_2)
         integer, intent(in) :: token_esperado
-        integer, intent(in) :: punto_sincronizacion
-        do while (num_pos <= size(tokens) .and. vistazo%type/= punto_sincronizacion)
+        integer, intent(in) :: punto_sincronizacion_1
+        integer, intent(in) :: punto_sincronizacion_2
+        character(len=:), allocatable :: comentario_error
+
+        comentario_error =  'Se esperaba '// tipo_token(token_esperado)
+        
+        ! print *, 'PM...    buscando punto de sincronizacion: ', TRIM(tipo_token(punto_sincronizacion_1)), ' O ' , TRIM(tipo_token(punto_sincronizacion_2))
+        
+        call errores%agregar_error(vistazo, comentario_error)
+
+        do while (num_pos <= size(tokens) .and. vistazo%type /= punto_sincronizacion_1 .and. vistazo%type /= punto_sincronizacion_2)
+            
             num_pos = num_pos + 1
-            vistazo = Tokens(num_pos)
+            vistazo = tokens(num_pos)
+        
         end do
+
+        if ( token_esperado == SIGNO_PUNTO_COMA .AND. vistazo%type == SIGNO_PUNTO_COMA ) vacio = .FALSE. 
+
+        ! print *, 'Punto sincronizacion encontrado', TRIM(vistazo%lexema), char(10) 
+
     end subroutine panicModeRecovery
 
     function tipo_token(token_parametro) result(token_)
@@ -411,7 +434,6 @@ contains
             case default
                 token_ = "Desconocido"
         end select
-    
         
     end function tipo_token
 

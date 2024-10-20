@@ -1,0 +1,102 @@
+<!--Controles
+	// Este bloque tambien puede recibir comentarios
+	Contenedor cont_body;
+	Contenedor cont_login;
+	Etiqueta label_inicio;
+	Etiqueta label_usuario; ?¿
+	Texto text_usuario;
+	Etiqueta label_pass;
+	Clave pass_usuario;
+	Check check_box;
+	Etiqueta label_recordar;
+	Boton boton_login;
+	Contenedor cont_footer;
+
+Controles-->
+
+<!--Propiedades
+	// Inicio cont_body
+	cont_body.setAncho(900);
+	cont_body.setAlto(500);
+	cont_body.setColorFondo(153, 153, 161);
+
+	// Inicio cont_login
+	cont_login.setAncho(300);
+	cont_login.setAlto(350);
+	cont_login.setColorFondo(244, 244, 246);
+
+	// Inicio label_inicio
+	label_inicio.setColorLetra(15, 76, 92);
+	label_inicio.setTexto("BIENVENIDO");
+
+	// Inicio label_usuario
+	label_usuario.setTexto("Usuario");
+	
+	// Inicio text_usuario
+	text_usuario.setAlto(20);
+	text_usuario.setAncho(200);
+	text_usuario.setTexto("");
+
+	// Inicio label_pass
+	label_pass.setTexto("Password");
+
+	// Inicio pass_usuario
+	pass_usuario.setAncho(200);
+	pass_usuario.setAlto(20);
+	pass_usuario.setAlineacion(centro);
+	pass_usuario.setTexto("");
+
+	// Inicio check_box
+	check_box.setMarcada(true);
+    
+	// Inicio label_recordar
+	label_recordar.setTexto("Recordar Password");
+	// Inicio boton_login
+	boton_login.setAlto(30);
+	boton_login.setAncho(150);
+	boton_login.setTexto("Ingresar");
+	boton_login.setAlineacion(centro);
+	
+	// Inicio cont_footer
+	cont_footer.setAlto(100);
+	cont_footer.setAncho(900);
+	cont_footer.setColorFondo(4, 51, 59);
+
+Propiedades -->
+
+<!--Colocacion
+	// cont_body
+	cont_body.setPosicion(0,0);
+	this.add(cont_body);
+	// cont_login
+	cont_login.setPosicion(300,75);
+	cont_body.add(cont_login);
+	// label_inicio
+	label_inicio.setPosicion(112, 50);
+	cont_login.add(label_inicio);
+	// label_usuario
+	label_usuario.setPosicion(50, 100);
+	cont_login.add(label_usuario);
+	// text_usuario
+	text_usuario.setPosicion(50, 120);
+	cont_login.add(text_usuario);
+	// label_usuario
+	label_pass.setPosicion(50, 160);
+	cont_login.add(label_pass);
+	// pass_usuario
+	pass_usuario.setPosicion(50, 180);
+	cont_login.add(pass_usuario);
+	// check_box
+	check_box.setPosicion(50, 220);
+	cont_login.add(check_box);
+	// label_recordar
+	label_recordar.setPosicion(80, 223);
+	cont_login.add(label_recordar);
+	// boton_login
+	boton_login.setPosicion(75,270);
+	cont_login.add(boton_login);
+	// cont_footer
+	cont_footer.setPosicion(0, 500);
+	this.add(cont_footer);
+
+Colocacion -->

@@ -1,4 +1,5 @@
 module ModuloToken
+
     implicit none
     public RESERVADA_CONTROLES, RESERVADA_ETIQUETA, RESERVADA_BOTON, RESERVADA_CHECK, RESERVADA_RADIOBOTON, RESERVADA_TEXTO, &
             RESERVADA_AREATEXTO, RESERVADA_CLAVE, RESERVADA_CONTENEDOR, RESERVADA_PROPIEDADES, RESERVADA_PROPIEDAD_COLOR_LETRA, RESERVADA_PROPIEDAD_TEXTO, &
@@ -6,11 +7,14 @@ module ModuloToken
             RESERVADA_PROPIEDAD_ALTO, RESERVADA_PROPIEDAD_POSICION, RESERVADA_COLOCACION, RESERVADA_THIS, RESERVADA_ADD, SIGNO_PUNTO, SIGNO_COMA, SIGNO_PUNTO_COMA,&
             SIGNO_MAYOR, SIGNO_MENOR,SIGNO_EXCLAMACION, SIGNO_GUION, PARENTESIS_ABRE, PARENTESIS_CIERRA, COMENTARIO, ENTERO, IDENTIFICADOR, RESERVADA_CADENA, ERROR, RESERVADA_FALSE,&
             RESERVADA_TRUE, RESERVADA_IZQUIERDA, RESERVADA_CENTRO, RESERVADA_DERECHA
+    
     type ::Token ! Type Token
+
         character(len = 100) :: lexema
         integer :: type
         integer :: position_x
         integer :: position_y
+        
     end type Token
     
     integer, parameter :: RESERVADA_CONTROLES = 1
@@ -57,8 +61,6 @@ module ModuloToken
     integer, parameter :: POSICION_X = 42
     integer, parameter :: POSICION_Y = 43
 
-
 contains
-
     
 end module ModuloToken

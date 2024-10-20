@@ -40,7 +40,7 @@ module ModuloControl
         end subroutine incializar_variables
 
     function elemento_html(this) result(resultado_html)
-        class(Control), intent(in) :: this
+        class(Control), intent(inout) :: this
         character(len=:), allocatable :: resultado_html
         resultado_html = ''
 
@@ -72,6 +72,8 @@ module ModuloControl
 
             case (RESERVADA_TEXTO)
 
+                if ( TRIM(this%texto) == '' ) this%texto = '""' 
+
                 resultado_html = '<input type="text" id="'// TRIM(this%ID) //'" value=' // TRIM(this%texto) //' style="text-align: '// TRIM(this%obtener_alineacion()) // ';">'
             
             case (RESERVADA_AREATEXTO)
@@ -79,6 +81,8 @@ module ModuloControl
                 resultado_html = ' <textarea id="'// TRIM(this%ID) //'>'// TRIM(this%obtener_texto()) //'</textarea>'
            
             case (RESERVADA_CLAVE)
+
+                if ( TRIM(this%texto) == '' ) this%texto = '""'
 
                 resultado_html = '<input type="password" id="'// TRIM(this%ID) //'" value=' // TRIM(this%texto) //' style="text-align: '// TRIM(this%obtener_alineacion()) // ';">'
             
@@ -109,6 +113,7 @@ module ModuloControl
         class(Control), intent(in) :: this
         character(len=:), allocatable :: sin_comillas
         integer :: i
+
         sin_comillas = ''
 
         do i = 1, LEN_TRIM(this%texto)

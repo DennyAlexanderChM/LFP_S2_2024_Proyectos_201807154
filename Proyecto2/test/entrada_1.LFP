@@ -1,20 +1,22 @@
 <!--Controles
+!hello
     // Este bloque tambien puede recibir comentarios
     Contenedor contlogin;
     Contenedor contFondo;
     Boton cmdIngresar;
     Clave pswClave;
     Etiqueta passw;
-    Etiqueta Nombre;
+    Etiqueta Nombre; 
     Texto Texto0;
-    Contenedor contlogo2;
+    Contenedor contlogo2; @
     Contenedor ContLogo1;
     Contenedor ContBody;
-Controles -->
+ Controles-->
 
 <!--Propiedades
     /*
     Definicion de propiedades
+    linea 2
     */
     //#$inicio de contlogin
     contlogin.setAncho(190);
@@ -34,7 +36,7 @@ Controles -->
     //#$fin de pswClave
     //#$inicio de etiqueta passw
     passw.setAncho(53);
-    passw.setAlto(13 );
+    passw.setAlto(13);
     passw.setColorLetra(128,128,128);
     passw.setTexto("Password");
     //#$fin de passw
@@ -58,7 +60,7 @@ Controles -->
     ContLogo1.setColorFondo(64,64,64);
     //#$fin de ContLogo1
     //#$inicio de ContBody
-    ContBody.setAncho(800); 
+    ContBody.setAncho(800);
     ContBody.setAlto(300);
     ContBody.setColorFondo(64,224,208);
     //#$fin de ContBody
@@ -89,3 +91,8 @@ Propiedades -->
     ContBody.setPosicion(23,21);
     this.add(ContBody);
 Colocacion -->
+
+
+
+
+
