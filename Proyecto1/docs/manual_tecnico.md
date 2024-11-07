@@ -374,13 +374,13 @@ S+ | L+ | N+ | "C+"#
 
 * Aplicar funciones anulables a cada nodo
 
-<image src='Proyecto1/docs/images/ARBOL1.jpg' alt='ábol de expresión'  caption='Árbol de la expresión S+ | L+ | N+ | "C+"# '>
+<image src='images/ARBOL1.jpg' alt='ábol de expresión'  caption='Árbol de la expresión S+ | L+ | N+ | "C+"# '>
 
 * Calculo de anulables
 
 * Calculo de primeros y últimos
 
-<image src='Proyecto1/docs/images/ARBOL2.jpg' alt='ábol de expresión'  caption='Árbol de la expresión S+ | L+ | N+ | "C+"# '>
+<image src='images/ARBOL2.jpg' alt='ábol de expresión'  caption='Árbol de la expresión S+ | L+ | N+ | "C+"# '>
 
 ### ⬛ Tabla de siguientes
 
@@ -419,4 +419,4 @@ Sig(7)= #
 
 ### ⬛ Autómata
 
-<image src="Proyecto1/docs/images/AFD.jpg" alt="árbol de expresión" caption="Autómata mínimo">
+<image src="images/AFD.jpg" alt="árbol de expresión" caption="Autómata mínimo">
