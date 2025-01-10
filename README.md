@@ -7,7 +7,11 @@
 
 - Para manuales del Proyecto 1, consulta el [Manual de Usuario](Proyecto1/docs/manual_usuario.md).
 
-- Para manuales del Proyecto 1, consulta el [Manual de Técnico](Proyecto1/docs/manual_tecnico.md.md).
+- Para manuales del Proyecto 1, consulta el [Manual de Técnico](Proyecto1/docs/manual_tecnico.md).
 
 ### Proyecto 2 (Análisis sintáctico)
 - Proyecto propuesto, [Proyecto No. 2](Proyecto2/docs/[LFP]Proyecto2_2S24.pdf).
+
+- Para manuales del Proyecto 2, consulta el [Manual de Usuario](Proyecto2/docs/manual_usuario.pdf).
+
+- Para manuales del Proyecto 2, consulta el [Manual de Técnico](Proyecto2/docs/manual_tecnico.pdf).
