@@ -10,4 +10,4 @@
 - Para manuales del Proyecto 1, consulta el [Manual de Técnico](Proyecto1/docs/manual_tecnico.md.md).
 
 ### Proyecto 2 (Análisis sintáctico)
-- Proyecto propuesto, [Proyecto No. 2](Proyecto1/docs/[LFP]Proyecto2_2S24.pdf).
+- Proyecto propuesto, [Proyecto No. 2](Proyecto2/docs/[LFP]Proyecto2_2S24.pdf).
